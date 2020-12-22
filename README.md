@@ -1,4 +1,4 @@
-# PU-HIV
+# Predicting HIV-1 protease cleavage sites with positive-unlabeled learning
 
 #### Zhenfeng Li
 #### Lun Hu
