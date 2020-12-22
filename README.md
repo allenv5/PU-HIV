@@ -16,7 +16,7 @@
 1. prepare the training and testing datasets by following the format in Sample folder
 2. run `java -jar EvoCleave/EvoCleave.jar Sample 16 0` to exract coevolutionary patterns. Note that PU-HIV will automatically use the coevolutonary patterns extracted from positive set for feature vector construction.
 2. run `python main.py` to execute PU-HIV. Several parameters have to be predetermined.  
-   `-f`: the features used t construct feature vectors, possible values of this parameter are 0(AAI), 1(CheP), 2(CoP), 3(AAI+CheP), 4(CheP+CoP), 5(AAI+CoP) and 6(AAI+CheP+CoP);  
+   `-f`: the features used t construct feature vectors, possible values of this parameter are 0 (AAI), 1 (CheP), 2 (CoP), 3 (AAI+CheP), 4 (CheP+CoP), 5 (AAI+CoP) and 6 (AAI+CheP+CoP);  
    `-c1`: the value of C1;  
    `-beta`: the value of beta;  
    `-i`: input folder;  
