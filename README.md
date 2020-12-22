@@ -3,7 +3,7 @@
 #### Zhenfeng Li
 #### Lun Hu
 #### Zehai Tang
-#### Chen Zhao
+#### Cheng Zhao
 ------
 ## Folders
 - `Dataset` contains all the five datasets used in the experiments.
