@@ -18,7 +18,7 @@
    The first parameter is the feature type of Biased-SVM.  
    The second paramter is the train set(optional parameters), sample/train is selected by default, you can also choose the five independent datasets(the 301, 746, 1625, impens and schilling datasets respectively).  
    The last one is is the test set(optional parameters), sample/test is selected by default, you can also choose the five independent datasets(the 301, 746, 1625, impens and schilling datasets respectively).
-3. Possible values for the feature types of Biased-SVM are listed as below.
+3. ossible values for the feature types of Biased-SVM are listed as below.
    - orthogonal coding = 0
    - chemical coding = 1
    - Evocleave coding = 2
