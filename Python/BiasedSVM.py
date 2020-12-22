@@ -236,120 +236,56 @@ def __feature_mul(dc, amino_data):
     train.append(train_y_data)
     return train
 
-
-def __train_test_model(data):
-    set_c = [0.03123, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32]
-    set_b = [2, 5, 10, 20, 30, 50, 100, 200]
-    print("The result of Biased-SVM is running")
-    try:
-        f = open('../results/result.txt', 'w+', encoding='utf-8')
-    except Exception as e:
-        print(e)
-
-    (train_data, test_data) = data
-
-    (x_train, y_train) = train_data
-    (x_test, y_test) = test_data
-
-    for c in set_c:
-        f.write("C={}\n".format(c))
-        for b in set_b:
-            f.write("\n b={}\n".format(b))
-            f.write("label 1 -1\n")
-            clf = svm.SVC(kernel='linear', probability=True, random_state=42, max_iter=2000,
-                          class_weight={-1: c / b, 1: c})
-            clf.fit(x_train, y_train)
-            y_test = list(y_test)
-            for l, s in enumerate(clf.predict_proba(x_test)):
-                f.write("{} {} {}\n".format(y_test[l], s[1], s[0]))
-        f.write('\n--------------------------------------------\n')
-    f.close()
-    print("The result of Biased-SVM method is saved")
-
-
-def __cross_validation(data):
-    set_c = [0.03123, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32]
-    set_b = [2, 5, 10, 20, 30, 50, 100, 200]
-    print("The result of 10-fold Cross Validation is running")
-    try:
-        f = open('../results/result.txt', 'w+', encoding='utf-8')
-    except Exception as e:
-        print(e)
-
-    (data_p, data_n) = data
-
-    kf = KFold(n_splits=10, shuffle=False)
-
-    xp = np.array(data_p[0])
-    yp = np.array(data_p[1])
-    xp_train = []
-    xp_test = []
-    for train_index, test_index in kf.split(xp):
-        xp_train.append(train_index)
-        xp_test.append(test_index)
-
-    xn = np.array(data_n[0])
-    yn = np.array(data_n[1])
-    xn_train = []
-    xn_test = []
-    for train_index, test_index in kf.split(xn):
-        xn_train.append(train_index)
-        xn_test.append(test_index)
-
-    for c in set_c:
-        f.write("C={}\n".format(c))
-        for b in set_b:
-            f.write("\n b={}\n".format(b))
-            f.write("label 1 -1\n")
-            clf = svm.SVC(kernel='linear', probability=True, random_state=42, max_iter=2000,
-                          class_weight={-1: c / b, 1: c})
-            for i in range(10):
-                x1_train, y1_train, x1_test, y1_test = xp[xp_train[i]], yp[xp_train[i]], xp[xp_test[i]], yp[xp_test[i]]
-                x2_train, y2_train, x2_test, y2_test = xn[xn_train[i]], yn[xn_train[i]], xn[xn_test[i]], yn[xn_test[i]]
-
-                x_train = np.append(x1_train, x2_train, axis=0)
-                y_train = np.append(y1_train, y2_train, axis=0)
-                x_test = np.append(x1_test, x2_test, axis=0)
-                y_test = np.append(y1_test, y2_test, axis=0)
-
-                clf.fit(x_train, y_train)
-                y_test = list(y_test)
-                for l, s in enumerate(clf.predict_proba(x_test)):
-                    f.write("{} {} {}\n".format(y_test[l], s[1], s[0]))
-        f.write('\n-------------------------------------------------\n')
-    f.close()
-    print("The result of 10-fold Cross Validation is saved")
-
-def __extract_dc():
+def __extract_dc(inputfile):
 
     ls = []
     for i in range(7):
         try:
-            ls.append(pd.read_table('../sample/rules/1/{}'.format(str(i)), sep=',', names=['AminoT2', 'WeightC']))
+            ls.append(pd.read_table('{}\\rules\\1\\{}'.format(inputfile, str(i)), sep=',', names=['AminoT2', 'WeightC']))
         except Exception as e:
             print(e)
-            print("Execute the command ‘java -jar EvoCleave.jar Sample 16 0’ to generate the corresponding Evocleave co-evolution patterns")
             exit()
     dc = pd.concat(ls, axis=0)
     dc.index = range(len(dc))
     return dc
 
 def __vector_construction(feature_method, dc, *frame):
-    if len(frame) == 1:
-        frame = frame[0]
-        amino_p = frame[frame['Label'] > 0]
-        amino_p.index = range(len(amino_p))
-
-        amino_n = frame[frame['Label'] < 0]
-        amino_n.index = range(len(amino_n))
-
-        data = [feature_method(dc, amino_p), feature_method(dc, amino_n)]
-    else:
-        data = [feature_method(dc, frame[0]), feature_method(dc, frame[1])]
+    data = [feature_method(dc, frame[0]), feature_method(dc, frame[1])]
     return data
 
 
-def run(code, *filename):
+def __train_test_model(feature_method, c1, beta, dc, inputfile, trainData, testData, cv=-1):
+    print("Biased-SVM is running")
+    try:
+        if cv==-1:
+            if not os.path.exists("{}\\results".format(inputfile)):
+                os.makedirs("{}\\results".format(inputfile))
+            f = open('{}\\results\\result.txt'.format(inputfile), 'w+', encoding='utf-8')
+        else:
+            if not os.path.exists("{}\\{}\\results".format(inputfile, str(cv))):
+                os.makedirs("{}\\{}\\results".format(inputfile, str(cv)))
+            f = open('{}\\{}\\results\\result.txt'.format(inputfile, str(cv)), 'w+', encoding='utf-8')
+    except Exception as e:
+        print(e)
+        exit()
+
+    train_data, test_data = __vector_construction(feature_method, dc, trainData, testData)
+
+    (x_train, y_train) = train_data
+    (x_test, y_test) = test_data
+
+    f.write("Amino label 1\n")
+    clf = svm.SVC(kernel='linear', probability=True, random_state=42, max_iter=2000, 
+                    class_weight={-1: c1 / beta, 1: c1})
+    clf.fit(x_train, y_train)
+    y_test = list(y_test)
+    for l, s in enumerate(clf.predict_proba(x_test)):
+        f.write("{} {} {}\n".format(testData["Amino"][l], y_test[l], s[1]))
+    f.close()
+    print("The result of Biased-SVM method is saved")
+
+
+def run(feature, c1, beta, inputfile, cv):
     code_feature = {
         "0": __feature_oc,
         "1": __feature_cc,
@@ -359,7 +295,11 @@ def run(code, *filename):
         "5": __feature_oc_dc,
         "6": __feature_mul
     }
-    if code not in code_feature.keys():
+    c1, beta, cv = eval(c1), eval(beta), eval(cv)
+    if c1<=0 or beta<=0:
+        print(" c1>=0 and beta>0")
+        exit()
+    if feature not in code_feature.keys():
         print("the code of feature selection is error")
         print("code 0: feature_oc")
         print("code 1: feature_cc")
@@ -370,43 +310,36 @@ def run(code, *filename):
         print("code 6: feature_mul")
         return
     else:
-        feature_method = code_feature[code]
-        if filename[0] == filename[1]:
-            frame = pd.read_table('../data/{}Data.txt'.format(filename[0]), sep=',', names=['Amino', 'Label'])
-            dc= pd.read_table('../data/{}Datadc.txt'.format(filename[0]), sep=',', names=['AminoT2', 'WeightC'])
-            data = __vector_construction(feature_method, dc, frame)
-            __cross_validation(data)
-        else:
+        feature_method = code_feature[feature]
+        dc = __extract_dc(inputfile)
+        if cv==-1:
             try:
-                if filename[0] == "train":
-                    frame_train_p = pd.read_table('../sample/train/pos', sep=',', names=['Amino', 'Label'])
-                    frame_train_n = pd.read_table('../sample/train/neg', sep=',', names=['Amino', 'Label'])
+                frame_train_p = pd.read_table('{}\\train\\pos'.format(inputfile), sep=',', names=['Amino', 'Label'])
+                frame_train_n = pd.read_table('{}\\train\\neg'.format(inputfile), sep=',', names=['Amino', 'Label'])
+                frame_train = pd.concat([frame_train_p, frame_train_n], axis=0)
+                frame_train.index = range(len(frame_train))
+
+                frame_test_p = pd.read_table('{}\\test\\pos'.format(inputfile), sep=',', names=['Amino', 'Label'])
+                frame_test_n = pd.read_table('{}\\test\\neg'.format(inputfile), sep=',', names=['Amino', 'Label'])
+                frame_test = pd.concat([frame_test_p, frame_test_n], axis=0)
+                frame_test.index = range(len(frame_test))
+            except Exception as e:
+                print(e)
+                exit()
+            __train_test_model(feature_method, c1, beta, dc, inputfile, frame_train, frame_test)
+        else:
+            for i in range(1, cv+1):
+                try:
+                    frame_train_p = pd.read_table('{}\\{}\\train\\pos'.format(inputfile, str(i)), sep=',', names=['Amino', 'Label'])
+                    frame_train_n = pd.read_table('{}\\{}\\train\\neg'.format(inputfile, str(i)), sep=',', names=['Amino', 'Label'])
                     frame_train = pd.concat([frame_train_p, frame_train_n], axis=0)
                     frame_train.index = range(len(frame_train))
-                    dc = __extract_dc()
-                else:
-                    try:
-                        frame_train = pd.read_table('../data/{}Data.txt'.format(filename[0]), sep=',', names=['Amino', 'Label'])
-                        dc= pd.read_table('../data/{}Datadc.txt'.format(filename[0]), sep=',', names=['AminoT2', 'WeightC'])
-                    except Exception as e:
-                        print(e)
-                        print("train file not found")
-                        exit()
 
-                if filename[1] == "test":
-                    frame_test_p = pd.read_table('../sample/test/pos', sep=',', names=['Amino', 'Label'])
-                    frame_test_n = pd.read_table('../sample/test/neg', sep=',', names=['Amino', 'Label'])
+                    frame_test_p = pd.read_table('{}\\{}\\test\\pos'.format(inputfile, str(i)), sep=',', names=['Amino', 'Label'])
+                    frame_test_n = pd.read_table('{}\\{}\\test\\neg'.format(inputfile, str(i)), sep=',', names=['Amino', 'Label'])
                     frame_test = pd.concat([frame_test_p, frame_test_n], axis=0)
                     frame_test.index = range(len(frame_test))
-                else:
-                    try:
-                        frame_test = pd.read_table('../data/{}Data.txt'.format(filename[1]), sep=',', names=['Amino', 'Label'])
-                    except Exception as e:
-                        print(e)
-                        print("test file not found")
-                        exit()
-                
-                data = __vector_construction(feature_method, dc, frame_train, frame_test)
-                __train_test_model(data)
-            except FileNotFoundError as e:
-                print(e)
+                except Exception as e:
+                    print(e)
+                    exit()
+                __train_test_model(feature_method, c1, beta, dc, inputfile, frame_train, frame_test, i)
