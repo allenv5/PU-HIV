@@ -6,7 +6,7 @@
 #### Cheng Zhao
 ------
 ## Folders
-- `Dataset` contains all the five datasets used in the experiments.
+- `Datasets` contains all the five datasets used in the experiments.
 - `Python` contains the python scripts of PU-HIV.
 - `EvoCleave` contains the executable file of EvoCleave.
 - `Sample` contains the sample data fo training and testing .
@@ -14,18 +14,16 @@
 
 ## Usage
 1. prepare the training and testing datasets by following the format in Sample folder
-2. run `java -jar EvoCleave/EvoCleave.jar Sample 16 0` to exract coevolutionary patterns, note that only coevolutonary patterns extracted from positive set should be used.
-2. run `python main.py -c 6 [-train 301] [-test 301]` to execute PU-HIV
-   The first parameter is the feature type of Biased-SVM.  
-   The second paramter is the train set(optional parameters), sample/train is selected by default, you can also choose the five independent datasets(the 301, 746, 1625, impens and schilling datasets respectively).  
-   The last one is is the test set(optional parameters), sample/test is selected by default, you can also choose the five independent datasets(the 301, 746, 1625, impens and schilling datasets respectively).
-3. possible values for the feature types of Biased-SVM are listed as below.
-   - orthogonal coding = 0
-   - chemical coding = 1
-   - Evocleave coding = 2
-   - orthogonal coding + chemical coding = 3
-   - chemical coding + Evocleave coding = 4
-   - orthogonal coding + Evocleave coding = 5
-   - orthogonal coding + chemical coding + Evocleave coding = 6
+2. run `java -jar EvoCleave/EvoCleave.jar Sample 16 0` to exract coevolutionary patterns. Note that PU-HIV will automatically use the coevolutonary patterns extracted from positive set for feature vector construction.
+2. run `python main.py` to execute PU-HIV. Several parameters have to be predetermined.
+   `-f`: the features used t construct feature vectors, possible values of this parameter are 0(AAI), 1(CheP), 2(CoP), 3(AAI+CheP), 4(CheP+CoP), 5(AAI+CoP) and 6(AAI+CheP+CoP);
+   `-c1`: the value of C1;
+   `-beta`: the value of beta;
+   `-i`: input folder;
+   `-cv`: optional, PU-HIV will switch to cross validation mode if provided and the value of this parameter is the number of folds in cross validation.
+   Hence, a complete command to run the sampl data is `python main.py -f 6 -c1 8 -beta 2 -i ../../Sample`.
+   If the paratemter `cv` is provided, the subfolders in the input folder should be named with integers. For example, if the value of `cv` is set as 10, the names of subfolders should be from 1 to 10.
+3. check out the results.txt file in the input folder for the prediction results of testing data.
+
 
 Node: The codes should be compatible with Python 3.6 and Java 1.8. If you get errors when running the scrips, please try the recommended versions.
