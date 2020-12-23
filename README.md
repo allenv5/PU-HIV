@@ -21,7 +21,7 @@
    `-beta`: the value of beta;  
    `-i`: input folder;  
    `-cv`: optional, PU-HIV will switch to cross validation mode if provided and the value of this parameter is the number of folds in cross validation.  
-   Hence, a complete command to run the sampl data is `python main.py -f 6 -c1 8 -beta 2 -i ../../Sample`.  
+   Hence, a complete command to run the sampl data is `python main.py -f 6 -c1 8 -beta 2 -i ../Sample`.  
    If the paratemter `cv` is provided, the subfolders in the input folder should be named with integers. For example, if the value of `cv` is set as 10, the names of subfolders should be from 1 to 10.
 3. check out the results.txt file in the input folder for the prediction results of testing data.
 
